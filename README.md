@@ -3,7 +3,7 @@
 This repository contains example of decentralized voting application and deploying scripts to local network
 
 * [Contracts review](https://github.com/HotBlock/dapp_voting_contracts/tree/master/contracts)
-* [Additional script]() for [dapp frontend](https://github.com/HotBlock/dapp_voting_contracts/tree/master/scripts)
+* [Additional script](https://github.com/HotBlock/dapp_voting_contracts/tree/master/scripts) for [dapp frontend](https://github.com/HotBlock/dapp_voting_frontend)
 
 Requirements: 
 
