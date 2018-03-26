@@ -2,8 +2,8 @@
 
 This repository contains example of decentralized voting application and deploying scripts to local network
 
-* [Contracts review]()
-* [Additional script]() for [dapp frontend]()
+* [Contracts review](https://github.com/HotBlock/dapp_voting_contracts/tree/master/contracts)
+* [Additional script]() for [dapp frontend](https://github.com/HotBlock/dapp_voting_contracts/tree/master/scripts)
 
 Requirements: 
 
@@ -13,7 +13,7 @@ Requirements:
 ## Setup
 Just clone this repo
 ```bash
-git clone http://this.repo.com
+git clone https://github.com/HotBlock/dapp_voting_contracts
 cd dapp_voting_contracts
 ```
 change `host` and `port` in `truffle.js` if you need, `localhost:7545` set as default
