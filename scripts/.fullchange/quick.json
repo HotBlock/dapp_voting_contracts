@@ -1,0 +1,7 @@
+addrs = '{ "Platform": "fi", "Staff": "seco" }';
+
+platformAbi = PLABI;
+staffAbi = STABI;
+
+platformData = "PLD";
+staffData = "STD";
