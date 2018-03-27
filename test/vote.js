@@ -56,18 +56,25 @@ contract('Staff', function(accounts) {
 
   it('default platform is close status 1', () => {        
     return Promise.resolve()
+    .then(() => staff.setPlatform(platformAddress))
+    .then(() => platform.setStaffContract(staffAddress))
     .then(() => platform.getPlatformState())
     .then(result => {      
       assert.equal(result.c[0], 1);
     });
   });
 
-  it('open platform, status 1', () => {        
+  it('open platform, status 0', () => {        
     return Promise.resolve()
-    .then(() => platform.getPlatformState())
-    .then(result => {      
-      assert.equal(result.c[0], 1);
-    });
+    .then(() => staff.setPlatform(platformAddress))
+    .then(() => platform.setStaffContract(staffAddress))
+    .then(() => addDirectorFromOWNER())
+    .then(() => platform.openPlatform(), {from: Director});
+    // .then(() => platform.getPlatformState())
+    // .then(result => {
+    // 	console.log(result);
+    //   // assert.equal(result.c[0], 1);
+    // });
   });
 
   it('send 1 ether to platform from Director', () => { 
@@ -86,17 +93,32 @@ contract('Staff', function(accounts) {
   });
   
   it('add director to platform from OWNER, token 1', () => {
-    return Promise.resolve()
-    .then(() => staff.setStaffBalance(Director, 1, {from: OWNER}))
-    .then(() => staff.getStaffBalance(Director))
-    .then(result => { 
-      assert.equal(result.c[0], 1);
-    });
+    return Promise.resolve().then(() => addDirectorFromOWNER());    
   });
 
 it('add five staff to platform from Director, token 2', () => {
     return Promise.resolve()
-    .then(() => staff.setStaffBalance(Director, 1, {from: OWNER}), 'add Director')    
+    .then(() => addDirectorFromOWNER())
+    .then(() => addFiveStaffFromDirector());
+  });
+  
+  it('add five proposals on platform');  	
+  it('get address who send proposals on platform');
+  it('vote proposals and check quorum');
+  it('select winner and close platform');
+
+  const addDirectorFromOWNER = function async (){
+  	return Promise.resolve()
+    .then(() => staff.setStaffBalance(Director, 1, {from: OWNER}), 'add Director')
+    .then(() => staff.getStaffBalance(Director))
+    .then(result => { 
+      assert.equal(result.c[0], 1);
+    });
+  }
+
+  const addFiveStaffFromDirector = function async (){
+  	return Promise.resolve()
+    .then(() => addDirectorFromOWNER())
     .then(() => staff.setStaffBalance(Staff1, 2, {from: Director}))
     .then(() => staff.getStaffBalance(Staff1))
     .then(result => {      
@@ -121,12 +143,7 @@ it('add five staff to platform from Director, token 2', () => {
     .then(() => staff.getStaffBalance(Staff5))
     .then(result => {            
       assert.equal(result.c[0], 2);
-    });    
-  });
-  
-  it('add and show five proposals on platform ');
-  it('get address who send proposals on platform');
-  it('vote proposals and check quorum');
-  it('select winner and close platform');
+    });
+  }
   
 });
