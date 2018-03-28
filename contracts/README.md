@@ -17,7 +17,7 @@ Task - create voting platform with Staff and Moderator roles
 #### Moderator features:
 
 * Can deposite money to platform _(minumum 1 ETH)_
-* Can change time for voting and adding proposals
+* Can change time for voting and adding proposals _(defaults: 1 hour to adding proposal, 1 day to vote)_
 * Can see proposals statistics
 * Can choose a winning proposal, once per cycle _(platform will send requested ETH to sender address)_
 	* it's quorum must be greater than 70%
