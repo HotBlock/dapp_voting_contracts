@@ -140,8 +140,23 @@ it('add five proposals on platform', () => {
     .then(() => voteFiveProposals());     
   });
 
-  it('select winner and close platform');
-
+  it('select winner and close platform', () => {
+  	return Promise.resolve()
+  	.then(() => setAddressesStaffAndPlatform())
+  	.then(() => addDirectorFromOWNER())
+  	.then(() => send1EtherToPlatform())  	
+  	.then(() => addFiveStaffFromDirector())
+  	.then(() => openPlatform())
+  	.then(() => addFiveProposals())
+    .then(() => voteFiveProposals())
+    .then(() => platform.showProposalStatistic(Staff1, {from: Director}))    
+    .then(() => timeSleep(20))
+    .then(() => platform.checkQuorum(Staff1))
+    .then(() => platform.checkQuorum(Staff2))
+    .then(() => platform.checkQuorum(Staff3))
+    .then(() => platform.checkQuorum(Staff3))        
+    .then(() => platform.selectWinner(Staff2, {from: Director}));
+  });
 
   let addDirectorFromOWNER = function(){
   	return Promise.resolve()
@@ -271,21 +286,11 @@ let voteFiveProposals = function(){
 	timesleep = 22;
   	return Promise.resolve()
   	.then(() => timeSleep(timesleep))
-  	.then(() => 
-  		platform.vote(Staff1, true, {from: Staff2})  	
-  	)
-  	.then(() =>   		
-  		platform.vote(Staff2, true, {from: Staff1})  	
-  	)
-  	.then(() =>   		
-  		platform.vote(Staff2, true, {from: Staff3})  	
-  	)
-  	.then(() =>   		
-  		platform.vote(Staff3, true, {from: Staff5})  	
-  	)
-  	.then(() =>   		
-  		platform.vote(Staff2, true, {from: Staff4})  	
-  	);     
+  	.then(() => platform.vote(Staff1, true, {from: Staff2}))
+  	.then(() => platform.vote(Staff2, true, {from: Staff1}))
+  	.then(() => platform.vote(Staff2, true, {from: Staff3}))
+  	.then(() => platform.vote(Staff3, false, {from: Staff5}))
+  	.then(() => platform.vote(Staff2, true, {from: Staff4}));     
 }
 
 let timeSleep = function (time) {
