@@ -63,12 +63,20 @@ contract('Staff', function(accounts) {
     });
   });
 
-  it('open platform, status 0', () => {        
-    return Promise.resolve().then(() => openPlatform());
+  it('open platform, status 0', () => {       
+    return Promise.resolve()
+    .then(() => setAddressesStaffAndPlatform())
+  	.then(() => addDirectorFromOWNER())
+  	.then(() => send1EtherToPlatform())  	
+  	.then(() => addFiveStaffFromDirector())
+    .then(() => openPlatform());
   });
 
-  it('send 1 ether to platform from Director', () => {     
-    return Promise.resolve().then(() => send1EtherToPlatform());
+  it('send 1 ether to platform from Director', () => {      
+    return Promise.resolve()
+    .then(() => setAddressesStaffAndPlatform())
+  	.then(() => addDirectorFromOWNER())    
+    .then(() => send1EtherToPlatform());
   });
   
   it('add director to platform from OWNER, token 1', () => {
@@ -83,11 +91,21 @@ contract('Staff', function(accounts) {
   
 it('add five proposals on platform', () => {
   	return Promise.resolve()
+  	.then(() => setAddressesStaffAndPlatform())
+  	.then(() => addDirectorFromOWNER())
+  	.then(() => send1EtherToPlatform())  	
+  	.then(() => addFiveStaffFromDirector())
+  	.then(() => openPlatform())
     .then(() => addFiveProposals());
 });  	
 
   it('get address who send proposals on platform', () => {
   	return Promise.resolve()
+  	.then(() => setAddressesStaffAndPlatform())
+  	.then(() => addDirectorFromOWNER())
+  	.then(() => send1EtherToPlatform())  	
+  	.then(() => addFiveStaffFromDirector())
+  	.then(() => openPlatform())
   	.then(() => addFiveProposals())
     .then(() => platform.getProposalSender(0))   
     .then(result => {
@@ -111,9 +129,19 @@ it('add five proposals on platform', () => {
     });
   });
   
-  it('vote proposals and check quorum');
+  it('vote five proposals', () => { 	
+  	return Promise.resolve()
+  	.then(() => setAddressesStaffAndPlatform())
+  	.then(() => addDirectorFromOWNER())
+  	.then(() => send1EtherToPlatform())  	
+  	.then(() => addFiveStaffFromDirector())
+  	.then(() => openPlatform())
+  	.then(() => addFiveProposals())
+    .then(() => voteFiveProposals());     
+  });
 
   it('select winner and close platform');
+
 
   let addDirectorFromOWNER = function(){
   	return Promise.resolve()
@@ -125,8 +153,7 @@ it('add five proposals on platform', () => {
   }
 
   let addFiveStaffFromDirector = function(){
-  	return Promise.resolve()
-    .then(() => addDirectorFromOWNER())
+  	return Promise.resolve()    
     .then(() => staff.setStaffBalance(Staff1, 2, {from: Director}))
     .then(() => staff.getStaffBalance(Staff1))
     .then(result => {      
@@ -155,10 +182,9 @@ it('add five proposals on platform', () => {
   }
   
   let openPlatform = function(){
-  	return Promise.resolve()
-    .then(() => staff.setPlatform(platformAddress))
-    .then(() => platform.setStaffContract(staffAddress))
-    .then(() => addDirectorFromOWNER())   
+  	return Promise.resolve()    
+    .then(() => platform.setProposalPeriod(20, {from: Director}))
+    .then(() => platform.setVotePeriod(15, {from: Director}))
     .then(() => platform.openPlatform({from: Director}))
     .then(() => platform.getPlatformState())
     .then(result => {     
@@ -168,15 +194,15 @@ it('add five proposals on platform', () => {
 
   let send1EtherToPlatform = function(){
   	var _value = web3.toWei(1, 'ether'); 
+
     return Promise.resolve()
-    .then(() => staff.setStaffBalance(Director, 1, {from: OWNER}))
     .then(() => platform.showBalance())
-    .then(result => {      
-      assert.equal(result.c[0], 0);
+    .then(result => {       
+      assert.equal(result.toNumber(), 0);
     })
-    .then(() => platform.depositeMoney({from: Director, value: _value}))
+    .then(() => platform.depositeMoney({value: _value, from: Director}))
     .then(() => platform.showBalance())
-    .then(result => {    
+    .then(result => {
       assert.equal(web3.fromWei(result.toNumber(), 'wei'), _value);
     });
   }
@@ -192,13 +218,8 @@ it('add five proposals on platform', () => {
   	var description = ["description 1", "description 2", "description 3", "description 4", "description 5"];
   	var amount = [0.1, 0.2, 0.3, 0.4, 0.5];
 	var _value = web3.toWei(1, 'ether'); 
-  	return Promise.resolve()
-    .then(() => addDirectorFromOWNER())
-    .then(() => send1EtherToPlatform())
-    .then(() => addFiveStaffFromDirector())    
-    .then(() => platform.setProposalPeriod(10, {from: Director}))
-    .then(() => platform.setVotePeriod(5, {from: Director}))
-    .then(() => openPlatform())       
+
+  	return Promise.resolve()   
     // 1
     .then(() => platform.addProposal(title[0], description[0], web3.toWei(amount[0], 'ether'), {from: Staff1}))
     .then(() => platform.showProposal(Staff1))
@@ -246,5 +267,39 @@ it('add five proposals on platform', () => {
     });
   }
 
+let voteFiveProposals = function(){
+	timesleep = 22;
+  	return Promise.resolve()
+  	.then(() => timeSleep(timesleep))
+  	.then(() => 
+  		platform.vote(Staff1, true, {from: Staff2})  	
+  	)
+  	.then(() =>   		
+  		platform.vote(Staff2, true, {from: Staff1})  	
+  	)
+  	.then(() =>   		
+  		platform.vote(Staff2, true, {from: Staff3})  	
+  	)
+  	.then(() =>   		
+  		platform.vote(Staff3, true, {from: Staff5})  	
+  	)
+  	.then(() =>   		
+  		platform.vote(Staff2, true, {from: Staff4})  	
+  	);     
+}
+
+let timeSleep = function (time) {
+  return new Promise((resolve, reject) => {
+    web3.currentProvider.sendAsync({
+      jsonrpc: "2.0",
+      method: "evm_increaseTime",
+      params: [time],
+      id: new Date().getTime()
+    }, (err, result) => {
+      if(err){ return reject(err) }
+      return resolve(result)
+    });
+  })
+}
 
 });

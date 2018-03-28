@@ -57,7 +57,7 @@ contract Platform {
 
 	// Проверяем когда сотрудник в последний раз голосовал
 	modifier canVote {
-		require(now > platformProposalEnd);
+        require(now > platformProposalEnd);
 		require(staffContract.getTimeVote(msg.sender) < platformVoteEnd);
 		_;
 	}
