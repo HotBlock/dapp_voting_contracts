@@ -49,9 +49,8 @@ contract('Staff', function(accounts) {
   const staffAddress = Staff.address;
 
   it('set address staff and platform', () => {
-    return Promise.resolve()
-    .then(() => staff.setPlatform(platformAddress))
-    .then(() => platform.setStaffContract(staffAddress));    
+    return Promise.resolve()    
+    .then(() => setAddressesStaffAndPlatform());    
   });
 
   it('default platform is close status 1', () => {        
@@ -65,58 +64,67 @@ contract('Staff', function(accounts) {
   });
 
   it('open platform, status 0', () => {        
-    return Promise.resolve()
-    .then(() => staff.setPlatform(platformAddress))
-    .then(() => platform.setStaffContract(staffAddress))
-    .then(() => addDirectorFromOWNER())
-    .then(() => platform.openPlatform(), {from: Director});
-    // .then(() => platform.getPlatformState())
-    // .then(result => {
-    // 	console.log(result);
-    //   // assert.equal(result.c[0], 1);
-    // });
+    return Promise.resolve().then(() => openPlatform());
   });
 
-  it('send 1 ether to platform from Director', () => { 
-    var _value = web3.toWei(1, 'ether'); 
-    return Promise.resolve() // depositeMoney
-    .then(() => staff.setStaffBalance(Director, 1, {from: OWNER}))
-    .then(() => platform.showBalance())
-    .then(result => {      
-      assert.equal(result.c[0], 0);
-    })
-    .then(() => platform.depositeMoney({from: Director, value: _value}))
-    .then(() => platform.showBalance())
-    .then(result => {      
-      assert.equal(web3.fromWei(result.toNumber(), 'wei'), _value);
-    });
+  it('send 1 ether to platform from Director', () => {     
+    return Promise.resolve().then(() => send1EtherToPlatform());
   });
   
   it('add director to platform from OWNER, token 1', () => {
     return Promise.resolve().then(() => addDirectorFromOWNER());    
   });
 
-it('add five staff to platform from Director, token 2', () => {
+  it('add five staff to platform from Director, token 2', () => {
     return Promise.resolve()
     .then(() => addDirectorFromOWNER())
     .then(() => addFiveStaffFromDirector());
   });
   
-  it('add five proposals on platform');  	
-  it('get address who send proposals on platform');
+it('add five proposals on platform', () => {
+  	return Promise.resolve()
+    .then(() => addFiveProposals());
+});  	
+
+  it('get address who send proposals on platform', () => {
+  	return Promise.resolve()
+  	.then(() => addFiveProposals())
+    .then(() => platform.getProposalSender(0))   
+    .then(result => {
+    	assert.equal(result, Staff1);    
+    })
+    .then(() => platform.getProposalSender(1))   
+    .then(result => {
+    	assert.equal(result, Staff2);    
+    })
+    .then(() => platform.getProposalSender(2))   
+    .then(result => {
+    	assert.equal(result, Staff3);    
+    })
+    .then(() => platform.getProposalSender(3))   
+    .then(result => {
+    	assert.equal(result, Staff4);    
+    })
+    .then(() => platform.getProposalSender(4))   
+    .then(result => {
+    	assert.equal(result, Staff5);    
+    });
+  });
+  
   it('vote proposals and check quorum');
+
   it('select winner and close platform');
 
-  const addDirectorFromOWNER = function async (){
+  let addDirectorFromOWNER = function(){
   	return Promise.resolve()
-    .then(() => staff.setStaffBalance(Director, 1, {from: OWNER}), 'add Director')
+    .then(() => staff.setStaffBalance(Director, 1, {from: OWNER}))
     .then(() => staff.getStaffBalance(Director))
-    .then(result => { 
-      assert.equal(result.c[0], 1);
+    .then(result => {    	
+    	assert.equal(result.c[0], 1);
     });
   }
 
-  const addFiveStaffFromDirector = function async (){
+  let addFiveStaffFromDirector = function(){
   	return Promise.resolve()
     .then(() => addDirectorFromOWNER())
     .then(() => staff.setStaffBalance(Staff1, 2, {from: Director}))
@@ -146,4 +154,97 @@ it('add five staff to platform from Director, token 2', () => {
     });
   }
   
+  let openPlatform = function(){
+  	return Promise.resolve()
+    .then(() => staff.setPlatform(platformAddress))
+    .then(() => platform.setStaffContract(staffAddress))
+    .then(() => addDirectorFromOWNER())   
+    .then(() => platform.openPlatform({from: Director}))
+    .then(() => platform.getPlatformState())
+    .then(result => {     
+      assert.equal(result.c[0], 0);
+    });
+  }
+
+  let send1EtherToPlatform = function(){
+  	var _value = web3.toWei(1, 'ether'); 
+    return Promise.resolve()
+    .then(() => staff.setStaffBalance(Director, 1, {from: OWNER}))
+    .then(() => platform.showBalance())
+    .then(result => {      
+      assert.equal(result.c[0], 0);
+    })
+    .then(() => platform.depositeMoney({from: Director, value: _value}))
+    .then(() => platform.showBalance())
+    .then(result => {    
+      assert.equal(web3.fromWei(result.toNumber(), 'wei'), _value);
+    });
+  }
+
+  let setAddressesStaffAndPlatform = function(){
+  	return Promise.resolve()
+    .then(() => staff.setPlatform(platformAddress))
+    .then(() => platform.setStaffContract(staffAddress));
+  }
+
+  let addFiveProposals = function(){
+  	var title = ["title 1", "title 2", "title 3", "title 4", "title 5"];
+  	var description = ["description 1", "description 2", "description 3", "description 4", "description 5"];
+  	var amount = [0.1, 0.2, 0.3, 0.4, 0.5];
+	var _value = web3.toWei(1, 'ether'); 
+  	return Promise.resolve()
+    .then(() => addDirectorFromOWNER())
+    .then(() => send1EtherToPlatform())
+    .then(() => addFiveStaffFromDirector())    
+    .then(() => platform.setProposalPeriod(10, {from: Director}))
+    .then(() => platform.setVotePeriod(5, {from: Director}))
+    .then(() => openPlatform())       
+    // 1
+    .then(() => platform.addProposal(title[0], description[0], web3.toWei(amount[0], 'ether'), {from: Staff1}))
+    .then(() => platform.showProposal(Staff1))
+    .then(result => {
+    	assert.equal(result[0], title[0]);
+    	assert.equal(result[1], description[0]);
+    	assert.equal(web3.fromWei(result[2].toNumber(), 'ether'), amount[0]);
+   	    assert.equal(result[4].toNumber(), 0);
+    })
+    // 2
+    .then(() => platform.addProposal(title[1], description[1], web3.toWei(amount[1], 'ether'), {from: Staff2}))
+    .then(() => platform.showProposal(Staff2))
+    .then(result => {    	
+    	assert.equal(result[0], title[1]);
+    	assert.equal(result[1], description[1]);
+    	assert.equal(web3.fromWei(result[2].toNumber(), 'ether'), amount[1]);
+   	    assert.equal(result[4].toNumber(), 0);  
+    })
+    // 3 
+    .then(() => platform.addProposal(title[2], description[2], web3.toWei(amount[2], 'ether'), {from: Staff3}))
+    .then(() => platform.showProposal(Staff3))
+    .then(result => {    	
+    	assert.equal(result[0], title[2]);
+    	assert.equal(result[1], description[2]);
+    	assert.equal(web3.fromWei(result[2].toNumber(), 'ether'), amount[2]);
+   	    assert.equal(result[4].toNumber(), 0);  
+    })
+    // 4
+    .then(() => platform.addProposal(title[3], description[3], web3.toWei(amount[3], 'ether'), {from: Staff4}))
+    .then(() => platform.showProposal(Staff4))
+    .then(result => {    	
+    	assert.equal(result[0], title[3]);
+    	assert.equal(result[1], description[3]);
+    	assert.equal(web3.fromWei(result[2].toNumber(), 'ether'), amount[3]);
+   	    assert.equal(result[4].toNumber(), 0);  
+    })
+    // 5
+    .then(() => platform.addProposal(title[4], description[4], web3.toWei(amount[4], 'ether'), {from: Staff5}))
+    .then(() => platform.showProposal(Staff5))
+    .then(result => {    	
+    	assert.equal(result[0], title[4]);
+    	assert.equal(result[1], description[4]);
+    	assert.equal(web3.fromWei(result[2].toNumber(), 'ether'), amount[4]);
+   	    assert.equal(result[4].toNumber(), 0);  
+    });
+  }
+
+
 });
